@@ -1,5 +1,4 @@
 import styled from '@emotion/styled';
-import React from 'react';
 
 export const Formulario = styled.form`
   max-width: 600px;
@@ -45,4 +44,15 @@ export const InputSubmit = styled.input`
   &:hover {
     cursor: pointer;
   }
+`;
+export const Error = styled.p`
+  background-color: red;
+  padding: 1rem;
+  font-family: 'PT Sans', sans-serif;
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: #fff;
+  text-align: center;
+  text-transform: uppercase;
+  margin: 2rem 0;
 `;
