@@ -59,6 +59,7 @@ const NuevoProducto = () => {
 
     //insertarlo en la BBDD
     firebase.db.collection('productos').add(producto);
+    return router.push('/');
   }
 
   const handleUploadStart = () => {
