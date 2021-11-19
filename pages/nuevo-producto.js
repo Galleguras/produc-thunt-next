@@ -8,73 +8,82 @@ import firebase, { FirebaseContext } from '../firebase';
 //validaciones
 import useValidacion from '../hooks/useValidacion';
 import FileUploader from 'react-firebase-file-uploader';
+
 const STATE_INICIAL = {
   nombre: '',
   empresa: '',
-  /*   imagen: '', */
+  imagen: '',
   url: '',
   descripcion: '',
 };
 
 const NuevoProducto = () => {
-  //state de las imagenes
-  const [nombreImagen, guardarNombre] = useState('');
+  // state de las imagenes
+  const [nombreimagen, guardarNombre] = useState('');
   const [subiendo, guardarSubiendo] = useState(false);
   const [progreso, guardarProgreso] = useState(0);
-  const [urlImagen, guardarUrlImagen] = useState('');
+  const [urlimagen, guardarUrlImagen] = useState('');
 
   const [error, guardarError] = useState(false);
-  const {
-    valores,
-    errores,
-    submitForm,
-    handleChange,
-    handleSubmit,
-    handleBlur,
-  } = useValidacion(STATE_INICIAL, validarCrearProducto, crearProducto);
+
+  const { valores, errores, handleSubmit, handleChange, handleBlur } =
+    useValidacion(STATE_INICIAL, validarCrearProducto, crearProducto);
+
   const { nombre, empresa, imagen, url, descripcion } = valores;
 
-  //hook de routing para redirecionar
+  // hook de routing para redireccionar
   const router = useRouter();
 
-  //context con las operaciones CRUD de firebase
+  // context con las operaciones crud de firebase
   const { usuario, firebase } = useContext(FirebaseContext);
+
   async function crearProducto() {
-    console.log('Creando producto...');
-    //Si el usuario no esta autenticado llevar a login
+    // si el usuario no esta autenticado llevar al login
     if (!usuario) {
       return router.push('/login');
     }
-    //crear el objeto de nuevo producto
+
+    // crear el objeto de nuevo producto
     const producto = {
       nombre,
       empresa,
       url,
-      urlImagen,
+      urlimagen,
       descripcion,
       votos: 0,
       comentarios: [],
       creado: Date.now(),
+      creador: {
+        id: usuario.uid,
+        nombre: usuario.displayName,
+      },
+      haVotado: [],
     };
 
-    //insertarlo en la BBDD
+    // insertarlo en la base de datos
     firebase.db.collection('productos').add(producto);
+
     return router.push('/');
   }
 
   const handleUploadStart = () => {
+    console.error('handleUploadStart-->');
     guardarProgreso(0);
     guardarSubiendo(true);
   };
 
-  const handleProgress = (progreso) => guardarProgreso({ progreso });
+  const handleProgress = (progreso) => {
+    console.error('handleProgress-->', progreso);
+    guardarProgreso({ progreso });
+  };
 
   const handleUploadError = (error) => {
     guardarSubiendo(error);
-    console.error(error);
+    console.error('handleUploadError-->', error);
   };
 
   const handleUploadSuccess = (nombre) => {
+    console.log('handlesuccess-->', nombre);
     guardarProgreso(100);
     guardarSubiendo(false);
     guardarNombre(nombre);
@@ -83,7 +92,7 @@ const NuevoProducto = () => {
       .child(nombre)
       .getDownloadURL()
       .then((url) => {
-        console.log(url);
+        console.log('url-->', url);
         guardarUrlImagen(url);
       });
   };
@@ -91,93 +100,103 @@ const NuevoProducto = () => {
   return (
     <div>
       <Layout>
-        <>
-          <h1
-            css={css`
-              text-align: center;
-              margin-top: 5rem;
-            `}
-          >
-            Nuevo Producto
-          </h1>
-          <Formulario onSubmit={handleSubmit} noValidate>
-            <fieldset>
-              <legend>Informacion General</legend>
-              <div>
-                <label htmlFor="nombre">Nombre</label>
-                <input
-                  type="text"
-                  id="nombre"
-                  placeholder="Tu Nombre"
-                  name="nombre"
-                  value={nombre}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                />
-              </div>
-              {errores.nombre && <Error>{errores.nombre}</Error>}
-              <div>
-                <label htmlFor="nombre">Empresa</label>
-                <input
-                  type="text"
-                  id="empresa"
-                  placeholder="Nombre Empresa"
-                  name="empresa"
-                  value={empresa}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                />
-              </div>
-              {errores.empresa && <Error>{errores.empresa}</Error>}
-              <div>
-                <label htmlFor="imagen">Imagen</label>
-                <FileUploader
-                  accept="image/*"
-                  id="imagen"
-                  name="imagen"
-                  /*        value={imagen}
-                  onChange={handleChange}
-                  onBlur={handleBlur} */
-                  randomizeFilename
-                  storageRef={firebase.storage.ref('images')}
-                  onUploadStart={handleUploadStart}
-                  onUploadError={handleUploadError}
-                  onUploadSuccess={handleUploadSuccess}
-                  onProgress={handleProgress}
-                />
-              </div>
-              {/*          {errores.imagen && <Error>{errores.imagen}</Error>} */}
-              <div>
-                <label htmlFor="url">URL</label>
-                <input
-                  type="url"
-                  id="url"
-                  placeholder="Url de tu producto"
-                  name="url"
-                  value={url}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                />
-              </div>
-              {errores.url && <Error>{errores.url}</Error>}
-            </fieldset>
-            <fieldset>
-              <legend>Sobre tu producto</legend>
-              <div>
-                <label htmlFor="descripcion">Descripcion</label>
-                <textarea
-                  id="descripcion"
-                  name="descripcion"
-                  value={descripcion}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                />
-              </div>
-              {errores.descripcion && <Error>{errores.descripcion}</Error>}
-            </fieldset>
-            <InputSubmit type="submit" value="Crear Cuenta" />
-          </Formulario>
-        </>
+        {!usuario ? null : (
+          <>
+            <h1
+              css={css`
+                text-align: center;
+                margin-top: 5rem;
+              `}
+            >
+              Nuevo Producto
+            </h1>
+            <Formulario onSubmit={handleSubmit} noValidate>
+              <fieldset>
+                <legend>Información General </legend>
+
+                <div>
+                  <label htmlFor="nombre">Nombre</label>
+                  <input
+                    type="text"
+                    id="nombre"
+                    placeholder="Nombre del Producto"
+                    name="nombre"
+                    value={nombre}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                  />
+                </div>
+
+                {errores.nombre && <Error>{errores.nombre}</Error>}
+
+                <div>
+                  <label htmlFor="empresa">Empresa</label>
+                  <input
+                    type="text"
+                    id="empresa"
+                    placeholder="Nombre Empresa o Compañia"
+                    name="empresa"
+                    value={empresa}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                  />
+                </div>
+
+                {errores.empresa && <Error>{errores.empresa}</Error>}
+
+                <div>
+                  <label htmlFor="imagen">Imagen</label>
+                  <FileUploader
+                    accept="image/*"
+                    id="imagen"
+                    name="imagen"
+                    randomizeFilename
+                    storageRef={firebase.storage.ref('productos')}
+                    onUploadStart={handleUploadStart}
+                    onUploadError={handleUploadError}
+                    onUploadSuccess={handleUploadSuccess}
+                    onProgress={handleProgress}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="url">URL</label>
+                  <input
+                    type="url"
+                    id="url"
+                    name="url"
+                    placeholder="URL de tu producto"
+                    value={url}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                  />
+                </div>
+
+                {errores.url && <Error>{errores.url}</Error>}
+              </fieldset>
+
+              <fieldset>
+                <legend>Sobre tu Producto</legend>
+
+                <div>
+                  <label htmlFor="descripcion">Descripcion</label>
+                  <textarea
+                    id="descripcion"
+                    name="descripcion"
+                    value={descripcion}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                  />
+                </div>
+
+                {errores.descripcion && <Error>{errores.descripcion}</Error>}
+              </fieldset>
+
+              {error && <Error>{error} </Error>}
+
+              <InputSubmit type="submit" value="Crear Producto" />
+            </Formulario>
+          </>
+        )}
       </Layout>
     </div>
   );
