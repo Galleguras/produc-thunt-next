@@ -8,6 +8,7 @@ import firebase, { FirebaseContext } from '../firebase';
 //validaciones
 import useValidacion from '../hooks/useValidacion';
 import FileUploader from 'react-firebase-file-uploader';
+import Error404 from '../components/layout/404';
 
 const STATE_INICIAL = {
   nombre: '',
@@ -36,7 +37,7 @@ const NuevoProducto = () => {
 
   // context con las operaciones crud de firebase
   const { usuario, firebase } = useContext(FirebaseContext);
-
+  console.log('Nuevo Prodcucto-->', usuario);
   async function crearProducto() {
     // si el usuario no esta autenticado llevar al login
     if (!usuario) {
@@ -100,7 +101,9 @@ const NuevoProducto = () => {
   return (
     <div>
       <Layout>
-        {!usuario ? null : (
+        {!usuario ? (
+          <Error404 />
+        ) : (
           <>
             <h1
               css={css`
