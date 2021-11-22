@@ -55,7 +55,7 @@ const Layout = (props) => {
         `}
       />
       <Head>
-        <title>Product Hunt Firebase y Next.js</title>
+        <title>Product Hunt Firebase y Next</title>
         <link
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"

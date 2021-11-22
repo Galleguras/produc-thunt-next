@@ -42,7 +42,7 @@ const Header = () => {
           `}
         >
           <Link href="/">
-            <Logo>P</Logo>
+            <Logo>PHT</Logo>
           </Link>
 
           {/* Buscador aqui */}
